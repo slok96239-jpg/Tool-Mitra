@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToolMitra - Free Online Tools</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f0f4ff;
+            color: #222;
+        }
+
+        header {
+            background: #1746a2;
+            color: white;
+            padding: 25px 15px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 36px;
+        }
+
+        header p {
+            margin-bottom: 0;
+        }
+
+        .search {
+            text-align: center;
+            padding: 25px 15px;
+        }
+
+        .search input {
+            width: 90%;
+            max-width: 450px;
+            padding: 13px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 10px 15px 40px;
+        }
+
+        .tools {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px #00000010;
+            text-align: center;
+        }
+
+        .card h2 {
+            font-size: 21px;
+        }
+
+        button {
+            background: #1746a2;
+            color: white;
+            padding: 11px 18px;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        button:hover {
+            background: #0c3078;
+        }
+
+        .tool-box {
+            background: white;
+            margin-top: 25px;
+            padding: 22px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .tool-box input {
+            padding: 10px;
+            margin: 7px;
+            max-width: 90%;
+        }
+
+        #result {
+            font-weight: bold;
+            margin-top: 15px;
+            overflow-wrap: anywhere;
+        }
+
+        footer {
+            background: #172b4d;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>🛠️ ToolMitra</h1>
+    <p>Aapke roz ke kaam ke free online tools!</p>
+</header>
+
+<div class="search">
+    <input
+        type="text"
+        id="search"
+        placeholder="Tool search karein..."
+        oninput="searchTools()">
+</div>
+
+<main class="container">
+
+    <h2>✨ Hamare Free Tools</h2>
+
+    <div class="tools" id="tools">
+
+        <div class="card" data-name="age calculator">
+            <h2>🎂 Age Calculator</h2>
+            <p>Apni umar calculate karein.</p>
+            <button onclick="showTool('age')">Use Tool</button>
+        </div>
+
+        <div class="card" data-name="percentage calculator">
+            <h2>📊 Percentage Calculator</h2>
+            <p>Apna percentage aasani se nikalein.</p>
+            <button onclick="showTool('percentage')">Use Tool</button>
+        </div>
+
+        <div class="card" data-name="photo compressor image size">
+            <h2>🖼️ Photo Compressor</h2>
+            <p>Photo ka file size kam karein.</p>
+            <button onclick="showTool('photo')">Use Tool</button>
+        </div>
+
+        <div class="card" data-name="word counter character counter">
+            <h2>📝 Word Counter</h2>
+            <p>Words aur characters ginein.</p>
+            <button onclick="showTool('words')">Use Tool</button>
+        </div>
+
+    </div>
+
+    <section class="tool-box" id="toolBox" hidden>
+        <h2 id="toolTitle">Tool</h2>
+        <div id="toolContent"></div>
+        <p id="result"></p>
+    </section>
+
+</main>
+
+<footer>
+    <p>© 2026 ToolMitra | Simple Tools, Easy Life</p>
+</footer>
+
+<script>
+function showTool(type) {
+    const box = document.getElementById("toolBox");
+    const title = document.getElementById("toolTitle");
+    const content = document.getElementById("toolContent");
+    const result = document.getElementById("result");
+
+    box.hidden = false;
+    result.textContent = "";
+
+    if (type === "age") {
+        title.textContent = "🎂 Age Calculator";
+        content.innerHTML = `
+            <label>Apni date of birth chunein:</label><br>
+            <input type="date" id="dob" max="${new Date().toISOString().slice(0,10)}"><br>
+            <button onclick="calculateAge()">Calculate Age</button>
+        `;
+    }
+
+    else if (type === "percentage") {
+        title.textContent = "📊 Percentage Calculator";
+        content.innerHTML = `
+            <input type="number" id="obtained" placeholder="Mile hue marks"><br>
+            <input type="number" id="total" placeholder="Total marks"><br>
+            <button onclick="calculatePercentage()">Calculate</button>
+        `;
+    }
+
+    else if (type === "photo") {
+        title.textContent = "🖼️ Photo Compressor";
+        content.innerHTML = `
+            <p>Photo chunein aur quality set karein.</p>
+            <input type="file" id="photoFile" accept="image/*"><br>
+            <label>Quality:</label>
+            <select id="quality">
+                <option value="0.4">Low size</option>
+                <option value="0.6" selected>Medium</option>
+                <option value="0.8">High quality</option>
+            </select><br><br>
+            <button onclick="compressPhoto()">Compress Photo</button>
+        `;
+    }
+
+    else if (type === "words") {
+        title.textContent = "📝 Word Counter";
+        content.innerHTML = `
+            <textarea id="textInput" rows="5" style="width:95%;max-width:500px" placeholder="Yahan apna text likhein"></textarea><br>
+            <button onclick="countWords()">Count Words</button>
+        `;
+    }
+
+    box.scrollIntoView({ behavior: "smooth" });
+}
+
+function calculateAge() {
+    const value = document.getElementById("dob").value;
+    const result = document.getElementById("result");
+
+    if (!value) {
+        result.textContent = "Pehle date of birth chunein.";
+        return;
+    }
+
+    const birth = new Date(value + "T00:00:00");
+    const today = new Date();
+
+    if (birth > today) {
+        result.textContent = "Sahi date chunein.";
+        return;
+    }
+
+    let years = today.getFullYear() - birth.getFullYear();
+    let months = today.getMonth() - birth.getMonth();
+    let days = today.getDate() - birth.getDate();
+
+    if (days < 0) {
+        months--;
+        days = new Date(today.getFullYear(), today.getMonth(), 0).getDate() + days;
+    }
+
+    if (months < 0) {
+        years--;
+        months += 12;
+    }
+
+    result.textContent = Aapki umar ${years} saal, ${months} mahine aur ${days} din hai.;
+}
+
+function calculatePercentage() {
+    const obtained = Number(document.getElementById("obtained").value);
+    const total = Number(document.getElementById("total").value);
+    const result = document.getElementById("result");
+
+    if (
+        document.getElementById("obtained").value === "" ||
+        document.getElementById("total").value === "" ||
+        total <= 0 || obtained < 0 || obtained > total
+    ) {
+        result.textContent = "Sahi marks aur total marks daalein.";
+        return;
+    }
+
+    result.textContent = "Percentage: " + (obtained / total * 100).toFixed(2) + "%";
+}
+
+function countWords() {
+    const text = document.getElementById("textInput").value.trim();
+    const words = text ? text.split(/\s+/).length : 0;
+    const characters = document.getElementById("textInput").value.length;
+
+    document.getElementById("result").textContent =
+        Words: ${words} | Characters: ${characters};
+}
+
+function compressPhoto() {
+    const file = document.getElementById("photoFile").files[0];
+    const result = document.getElementById("result");
+
+    if (!file || !file.type.startsWith("image/")) {
+        result.textContent = "Pehle ek valid image chunein.";
+        return;
+    }
+
+    const quality = Number(document.getElementById("quality").value);
+    const reader = new FileReader();
+
+    reader.onload = function(event) {
+        const img = new Image();
+
+        img.onload = function() {
+            const canvas = document.createElement("canvas");
+            const maxDimension = 2000;
+            const scale = Math.min(
+                1,
+                maxDimension / Math.max(img.width, img.height)
+            );
+
+            canvas.width = Math.round(img.width * scale);
+            canvas.height = Math.round(img.height * scale);
+
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            canvas.toBlob(function(blob) {
+                if (!blob) {
+                    result.textContent = "Photo compress nahi ho payi.";
+                    return;
+                }
+
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = "ToolMitra-compressed.jpg";
+                link.textContent = "Download Compressed Photo";
+                link.style.display = "inline-block";
+                link.style.marginTop = "12px";
+
+                result.replaceChildren();
+
+                const info = document.createElement("p");
+                info.textContent =
+                    `Original: ${(file.size / 1024).toFixed(1)} KB | ` +
+                    Compressed: ${(blob.size / 1024).toFixed(1)} KB;
+
+                result.append(info, link);
+            }, "image/jpeg", quality);
+        };
+
+        img.onerror = function() {
+            result.textContent = "Is image ko open nahi kar paye.";
+        };
+
+        img.src = event.target.result;
+    };
+
+    reader.readAsDataURL(file);
+}
+
+function searchTools() {
+    const query = document.getElementById("search").value.toLowerCase();
+
+    document.querySelectorAll(".card").forEach(card => {
+        card.style.display =
+            card.dataset.name.includes(query) ? "" : "none";
+    });
+}
+</script>
+
+</body>
+</html>
