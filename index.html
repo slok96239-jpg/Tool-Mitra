@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta name="google-site-verification" content="ig1SsEvzZP0FKIGI1EqGBeJxvHOXxy5_K2PqvZ2t_GQ" />
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ToolMitra - Free Online Tools</title>
@@ -22,6 +23,31 @@ button{background:#1746a2;color:white;border:0;padding:11px 15px;border-radius:6
 button:hover{background:#103578}
 .result{font-weight:bold;overflow-wrap:anywhere;margin-top:12px}
 footer{text-align:center;background:#103578;color:white;padding:20px;margin-top:30px}
+/* Tool cards layout */
+.tools-grid {
+display: grid;
+grid-template-columns: repeat(3, minmax(0, 1fr));
+gap: 20px;
+}
+
+.tool-card {
+width: auto;
+max-width: 100%;
+margin: 0;
+box-sizing: border-box;
+}
+
+@media (max-width: 700px) {
+.tools-grid {
+grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+}
+
+@media (max-width: 450px) {
+.tools-grid {
+grid-template-columns: 1fr;
+}
+}
 </style>
 </head>
 <body>
@@ -246,6 +272,679 @@ document.getElementById("compressBtn").addEventListener("click", function () {
   reader.readAsDataURL(file);
 });
 </script>
+<!-- Password Generator Tool -->
+<div class="tool-card" style="max-width:500px;margin:30px auto;padding:25px;background:#fff;border-radius:15px;box-shadow:0 4px 15px #0002;text-align:center;">
 
+  <h2>🔐 Password Generator</h2>
+
+  <p>Generate a strong and secure password!</p>
+
+  <input
+    type="text"
+    id="generatedPassword"
+    placeholder="Your password will appear here"
+    readonly
+    style="width:90%;padding:12px;margin:10px 0;border:1px solid #ccc;border-radius:8px;"
+  >
+
+  <br>
+
+  <label>
+    Password Length:
+    <input type="number" id="passwordLength" value="12" min="8" max="64" style="width:60px;padding:8px;">
+  </label>
+
+  <br><br>
+
+  <button onclick="generatePassword()" style="padding:12px 20px;background:#2563eb;color:white;border:none;border-radius:8px;cursor:pointer;">
+    Generate Password
+  </button>
+
+  <button onclick="copyPassword()" style="padding:12px 20px;background:#16a34a;color:white;border:none;border-radius:8px;cursor:pointer;">
+    Copy Password
+  </button>
+
+  <p id="passwordMessage"></p>
+
+</div>
+
+<script>
+function generatePassword() {
+  const length = Number(document.getElementById("passwordLength").value);
+  const output = document.getElementById("generatedPassword");
+  const message = document.getElementById("passwordMessage");
+
+  if (!Number.isInteger(length) || length < 8 || length > 64) {
+    message.textContent = "Choose a length between 8 and 64.";
+    return;
+  }
+
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+  const random = new Uint32Array(length);
+  crypto.getRandomValues(random);
+
+  let password = "";
+
+  for (let i = 0; i < length; i++) {
+    password += chars[random[i] % chars.length];
+  }
+
+  output.value = password;
+  message.textContent = "Password generated successfully!";
+}
+
+async function copyPassword() {
+  const output = document.getElementById("generatedPassword");
+  const message = document.getElementById("passwordMessage");
+
+  if (!output.value) {
+    message.textContent = "First generate a password!";
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(output.value);
+    message.textContent = "Password copied successfully!";
+  } catch {
+    output.select();
+    message.textContent = "Select and copy the password manually.";
+  }
+}
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const grid = document.querySelector(".grid");
+  const cards = document.querySelectorAll(".tool-card");
+
+  if (!grid) return;
+
+  cards.forEach(function (card) {
+    const heading = card.querySelector("h2");
+
+    if (heading && heading.textContent.includes("Password Generator")) {
+      card.style.maxWidth = "100%";
+      card.style.width = "auto";
+      card.style.margin = "0";
+      card.style.boxSizing = "border-box";
+      grid.appendChild(card);
+    }
+  });
+});
+</script>
+<!-- QR Code Generator -->
+<div id="qrTool" class="tool-card" style="padding:20px;text-align:center;box-sizing:border-box;">
+
+  <h2>📱 QR Code Generator</h2>
+
+  <p>Enter text or a website link to create a QR code.</p>
+
+  <input
+    type="text"
+    id="qrInput"
+    placeholder="Enter text or URL"
+    style="width:90%;padding:12px;border:1px solid #ccc;border-radius:8px;box-sizing:border-box;"
+  >
+
+  <br><br>
+
+  <button
+    onclick="makeQRCode()"
+    style="padding:12px 20px;background:#2563eb;color:white;border:0;border-radius:8px;cursor:pointer;">
+    Generate QR Code
+  </button>
+
+  <div id="qrResult" style="margin:20px auto;display:flex;justify-content:center;"></div>
+
+  <button
+    id="qrDownload"
+    onclick="downloadQRCode()"
+    style="display:none;padding:10px 16px;background:#16a34a;color:white;border:0;border-radius:8px;cursor:pointer;">
+    Download QR Code
+  </button>
+
+  <p id="qrMessage"></p>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+function makeQRCode() {
+  const input = document.getElementById("qrInput").value.trim();
+  const result = document.getElementById("qrResult");
+  const message = document.getElementById("qrMessage");
+  const download = document.getElementById("qrDownload");
+
+  result.innerHTML = "";
+  download.style.display = "none";
+
+  if (!input) {
+    message.textContent = "Please enter text or a URL.";
+    return;
+  }
+
+  if (typeof QRCode === "undefined") {
+    message.textContent = "QR library load nahi hui. Internet check karke page refresh karo.";
+    return;
+  }
+
+  new QRCode(result, {
+    text: input,
+    width: 200,
+    height: 200,
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  message.textContent = "QR Code generated successfully!";
+  download.style.display = "inline-block";
+}
+
+function downloadQRCode() {
+  const result = document.getElementById("qrResult");
+  const image = result.querySelector("canvas") ||
+                result.querySelector("img");
+
+  if (!image) return;
+
+  const link = document.createElement("a");
+  link.download = "toolmitra-qr-code.png";
+  link.href = image.tagName === "CANVAS"
+    ? image.toDataURL("image/png")
+    : image.src;
+
+  link.click();
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  const grid = document.querySelector(".grid");
+  const qrTool = document.getElementById("qrTool");
+
+  if (grid && qrTool) {
+    grid.appendChild(qrTool);
+  }
+});
+</script>
+<!-- PDF Merger Tool --><div id="pdfMergerTool" class="tool-card" style="padding:20px;text-align:center;box-sizing:border-box;">  <h2>📄 PDF Merger</h2>
+  <p>Combine multiple PDF files into one PDF.</p><input
+type="file"
+id="pdfFiles"
+accept=".pdf,application/pdf"
+multiple
+style="width:90%;margin:15px 0;"
+
+«»
+
+  <br><button
+id="mergePdfButton"
+onclick="mergePDFs()"
+style="padding:12px 20px;background:#2563eb;color:white;border:0;border-radius:8px;cursor:pointer;">
+Merge PDFs
+</button>
+
+  <p id="pdfMergeMessage"></p></div><script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script><script>
+async function mergePDFs() {
+  const input = document.getElementById("pdfFiles");
+  const message = document.getElementById("pdfMergeMessage");
+  const button = document.getElementById("mergePdfButton");
+  const files = input.files;
+
+  if (!files || files.length < 2) {
+    message.textContent = "Please select at least 2 PDF files.";
+    return;
+  }
+
+  if (typeof PDFLib === "undefined") {
+    message.textContent = "PDF library load nahi hui. Internet check karke refresh karo.";
+    return;
+  }
+
+  button.disabled = true;
+  message.textContent = "Please wait, PDFs are being merged...";
+
+  try {
+    const mergedPdf = await PDFLib.PDFDocument.create();
+
+    for (const file of files) {
+      const bytes = await file.arrayBuffer();
+      const pdf = await PDFLib.PDFDocument.load(bytes);
+      const pages = await mergedPdf.copyPages(
+        pdf,
+        pdf.getPageIndices()
+      );
+
+      pages.forEach(page => mergedPdf.addPage(page));
+    }
+
+    const mergedBytes = await mergedPdf.save();
+    const blob = new Blob([mergedBytes], {
+      type: "application/pdf"
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "ToolMitra-Merged.pdf";
+    link.click();
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+    message.textContent = "PDFs merged successfully! Download started.";
+  } catch (error) {
+    message.textContent = "PDF merge nahi hua. Files check karke dobara try karo.";
+  } finally {
+    button.disabled = false;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  const grid = document.querySelector(".grid");
+  const pdfTool = document.getElementById("pdfMergerTool");
+
+  if (grid && pdfTool) {
+    grid.appendChild(pdfTool);
+  }
+});
+</script>
+<!-- Image Converter Tool --><div id="imageConverterTool" class="tool-card" style="padding:20px;text-align:center;box-sizing:border-box;">  <h2>🖼️ Image Converter</h2>
+  <p>Convert your image into JPG, PNG or WebP format.</p><input
+type="file"
+id="converterImage"
+accept="image/*"
+style="width:90%;margin:15px 0;"
+
+«»
+
+<br><br>
+
+  <select id="converterFormat" style="padding:10px;border-radius:8px;">
+    <option value="image/png">PNG</option>
+    <option value="image/jpeg">JPG</option>
+    <option value="image/webp">WebP</option>
+  </select><br><br>
+
+<button
+onclick="convertImage()"
+style="padding:12px 20px;background:#2563eb;color:white;border:0;border-radius:8px;cursor:pointer;">
+Convert Image
+</button>
+
+  <p id="converterMessage"></p><canvas id="converterCanvas" style="display:none;"></canvas>
+
+</div><script>
+function convertImage() {
+  const fileInput = document.getElementById("converterImage");
+  const format = document.getElementById("converterFormat").value;
+  const message = document.getElementById("converterMessage");
+  const canvas = document.getElementById("converterCanvas");
+
+  if (!fileInput.files.length) {
+    message.textContent = "Please select an image first.";
+    return;
+  }
+
+  const file = fileInput.files[0];
+
+  if (!file.type.startsWith("image/")) {
+    message.textContent = "Please select a valid image.";
+    return;
+  }
+
+  const image = new Image();
+  const imageURL = URL.createObjectURL(file);
+
+  image.onload = function() {
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
+
+    const context = canvas.getContext("2d");
+
+    if (format === "image/jpeg") {
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    context.drawImage(image, 0, 0);
+
+    canvas.toBlob(function(blob) {
+      URL.revokeObjectURL(imageURL);
+
+      if (!blob) {
+        message.textContent = "Conversion failed. Please try another image.";
+        return;
+      }
+
+      const extension = format === "image/jpeg" ? "jpg" :
+                        format === "image/webp" ? "webp" : "png";
+
+      const downloadURL = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = downloadURL;
+      link.download = "ToolMitra-Image." + extension;
+      link.click();
+
+      setTimeout(function() {
+        URL.revokeObjectURL(downloadURL);
+      }, 2000);
+
+      message.textContent = "Image converted! Download started.";
+    }, format, 0.92);
+  };
+
+  image.onerror = function() {
+    URL.revokeObjectURL(imageURL);
+    message.textContent = "Image could not be opened. Try another file.";
+  };
+
+  image.src = imageURL;
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  const grid = document.querySelector(".grid");
+  const tool = document.getElementById("imageConverterTool");
+
+  if (grid && tool) {
+    grid.appendChild(tool);
+  }
+});
+</script>
+<!-- ToolMitra Photo Editor --><div id="tmPhotoEditor" class="tool-card" style="padding:20px;text-align:center;box-sizing:border-box;">  <h2>🎨 AI Photo Editor</h2>
+  <p>Upload, edit and download your photo.</p>  <input type="file" id="tmPhotoInput" accept="image/*" style="max-width:100%;margin:15px 0;">  <div style="margin:15px auto;max-width:100%;overflow:auto;">
+    <canvas id="tmPhotoCanvas" style="max-width:100%;height:auto;border-radius:10px;"></canvas>
+  </div>  <div style="text-align:left;max-width:400px;margin:20px auto;"><label for="tmBrightness">☀️ Brightness</label>
+<input type="range" id="tmBrightness" min="0" max="200" value="100" style="width:100%;">
+
+<label for="tmContrast">🎨 Contrast</label>
+<input type="range" id="tmContrast" min="0" max="200" value="100" style="width:100%;">
+
+<label for="tmSaturation">🌈 Saturation</label>
+<input type="range" id="tmSaturation" min="0" max="200" value="100" style="width:100%;">
+
+<label for="tmGrayscale">⚫ Black & White</label>
+<input type="checkbox" id="tmGrayscale">
+
+  </div>  <button onclick="tmRotatePhoto()" style="padding:10px 15px;margin:5px;background:#7c3aed;color:white;border:0;border-radius:8px;cursor:pointer;">
+    🔄 Rotate
+  </button>  <button onclick="tmResetPhoto()" style="padding:10px 15px;margin:5px;background:#64748b;color:white;border:0;border-radius:8px;cursor:pointer;">
+    Reset
+  </button>  <button onclick="tmDownloadPhoto()" style="padding:10px 15px;margin:5px;background:#16a34a;color:white;border:0;border-radius:8px;cursor:pointer;">
+    📥 Download Photo
+  </button>  <p id="tmPhotoMessage">Upload a photo to start editing.</p></div><script>
+(function () {
+  const input = document.getElementById("tmPhotoInput");
+  const canvas = document.getElementById("tmPhotoCanvas");
+  const ctx = canvas.getContext("2d");
+  const message = document.getElementById("tmPhotoMessage");
+
+  const brightness = document.getElementById("tmBrightness");
+  const contrast = document.getElementById("tmContrast");
+  const saturation = document.getElementById("tmSaturation");
+  const grayscale = document.getElementById("tmGrayscale");
+
+  let photo = new Image();
+  let loaded = false;
+  let rotation = 0;
+
+  function renderPhoto() {
+    if (!loaded) return;
+
+    const angle = ((rotation % 360) + 360) % 360;
+    const sideways = angle === 90 || angle === 270;
+
+    canvas.width = sideways ? photo.naturalHeight : photo.naturalWidth;
+    canvas.height = sideways ? photo.naturalWidth : photo.naturalHeight;
+
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate(angle * Math.PI / 180);
+
+    ctx.filter =
+      "brightness(" + brightness.value + "%) " +
+      "contrast(" + contrast.value + "%) " +
+      "saturate(" + saturation.value + "%) " +
+      "grayscale(" + (grayscale.checked ? 100 : 0) + "%)";
+
+    ctx.drawImage(
+      photo,
+      -photo.naturalWidth / 2,
+      -photo.naturalHeight / 2
+    );
+
+    ctx.restore();
+    ctx.filter = "none";
+  }
+
+  input.addEventListener("change", function () {
+    const file = input.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      message.textContent = "Please choose a valid image.";
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function (event) {
+      photo.onload = function () {
+        loaded = true;
+        rotation = 0;
+        brightness.value = 100;
+        contrast.value = 100;
+        saturation.value = 100;
+        grayscale.checked = false;
+        renderPhoto();
+        message.textContent = "Photo loaded! Start editing.";
+      };
+
+      photo.onerror = function () {
+        message.textContent = "Could not open this image.";
+      };
+
+      photo.src = event.target.result;
+    };
+
+    reader.readAsDataURL(file);
+  });
+
+  [brightness, contrast, saturation, grayscale].forEach(function (control) {
+    control.addEventListener("input", renderPhoto);
+    control.addEventListener("change", renderPhoto);
+  });
+
+  window.tmRotatePhoto = function () {
+    if (!loaded) {
+      message.textContent = "Please upload a photo first.";
+      return;
+    }
+
+    rotation = (rotation + 90) % 360;
+    renderPhoto();
+  };
+
+  window.tmResetPhoto = function () {
+    if (!loaded) {
+      message.textContent = "Please upload a photo first.";
+      return;
+    }
+
+    rotation = 0;
+    brightness.value = 100;
+    contrast.value = 100;
+    saturation.value = 100;
+    grayscale.checked = false;
+    renderPhoto();
+    message.textContent = "Photo settings reset.";
+  };
+
+  window.tmDownloadPhoto = function () {
+    if (!loaded) {
+      message.textContent = "Please upload a photo first.";
+      return;
+    }
+
+    renderPhoto();
+
+    canvas.toBlob(function (blob) {
+      if (!blob) {
+        message.textContent = "Download failed. Please try again.";
+        return;
+      }
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "ToolMitra-Edited-Photo.png";
+      link.click();
+
+      setTimeout(function () {
+        URL.revokeObjectURL(url);
+      }, 2000);
+
+      message.textContent = "Edited photo download started!";
+    }, "image/png");
+  };
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const grid = document.querySelector(".grid");
+    const tool = document.getElementById("tmPhotoEditor");
+
+    if (grid && tool) {
+      grid.appendChild(tool);
+    }
+  });
+})();
+</script>
+<!-- ToolMitra Background Remover --><div id="tmBackgroundRemover" class="tool-card" style="padding:20px;text-align:center;box-sizing:border-box;">  <h2>✂️ AI Background Remover</h2>
+  <p>Remove your photo background and download a transparent PNG.</p><input
+type="file"
+id="tmBgInput"
+accept="image/*"
+style="max-width:100%;margin:15px 0;"
+
+«»
+
+<br><br>
+
+<img
+id="tmBgPreview"
+alt="Processed photo preview"
+style="display:none;max-width:100%;max-height:350px;object-fit:contain;border-radius:10px;"
+
+«»
+
+<br><br>
+
+<button
+id="tmBgRemoveButton"
+style="padding:12px 20px;background:#2563eb;color:white;border:0;border-radius:8px;cursor:pointer;">
+✨ Remove Background
+</button>
+
+<br><br>
+
+<a
+id="tmBgDownload"
+download="ToolMitra-Background-Removed.png"
+style="display:none;padding:12px 20px;background:#16a34a;color:white;border-radius:8px;text-decoration:none;">
+📥 Download Transparent PNG
+</a>
+
+  <p id="tmBgMessage">Upload a photo to get started.</p></div><script type="module">
+const bgInput = document.getElementById("tmBgInput");
+const bgButton = document.getElementById("tmBgRemoveButton");
+const bgPreview = document.getElementById("tmBgPreview");
+const bgDownload = document.getElementById("tmBgDownload");
+const bgMessage = document.getElementById("tmBgMessage");
+
+let bgOutputUrl = null;
+
+bgInput.addEventListener("change", function () {
+  const file = bgInput.files[0];
+
+  bgPreview.style.display = "none";
+  bgDownload.style.display = "none";
+
+  if (bgOutputUrl) {
+    URL.revokeObjectURL(bgOutputUrl);
+    bgOutputUrl = null;
+  }
+
+  if (!file) return;
+
+  if (!file.type.startsWith("image/")) {
+    bgMessage.textContent = "Please select a valid image.";
+    return;
+  }
+
+  bgPreview.src = URL.createObjectURL(file);
+  bgPreview.style.display = "inline-block";
+  bgMessage.textContent = "Photo selected. Click Remove Background.";
+});
+
+bgButton.addEventListener("click", async function () {
+  const file = bgInput.files[0];
+
+  if (!file) {
+    bgMessage.textContent = "Please upload a photo first.";
+    return;
+  }
+
+  bgButton.disabled = true;
+  bgMessage.textContent =
+    "Loading the AI model... First use may take time and require a large download.";
+
+  try {
+    const { removeBackground } = await import(
+      "https://esm.sh/@imgly/background-removal@1.5.5"
+    );
+
+    bgMessage.textContent =
+      "Removing background. Please wait; this may take several minutes.";
+
+    const resultBlob = await removeBackground(file, {
+  device: "cpu",
+  output: {
+    format: "image/png",
+    quality: 0.8
+  }
+});
+
+    if (bgOutputUrl) {
+      URL.revokeObjectURL(bgOutputUrl);
+    }
+
+    bgOutputUrl = URL.createObjectURL(resultBlob);
+
+    bgPreview.onload = function () {
+      bgPreview.style.display = "inline-block";
+    };
+
+    bgPreview.src = bgOutputUrl;
+    bgDownload.href = bgOutputUrl;
+    bgDownload.style.display = "inline-block";
+
+    bgMessage.textContent =
+      "Background removed successfully! Download your transparent PNG.";
+  } catch (error) {
+    console.error("Background removal error:", error);
+
+    bgMessage.textContent =
+      "Could not remove background. Check your internet connection and try again. If it still fails, the browser or AI model may not be supported.";
+  } finally {
+    bgButton.disabled = false;
+  }
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  const grid = document.querySelector(".grid");
+  const tool = document.getElementById("tmBackgroundRemover");
+
+  if (grid && tool) {
+    grid.appendChild(tool);
+  }
+});
+</script>
 </body>
 </html>
